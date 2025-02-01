@@ -46,6 +46,137 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
 
 ---
 
+## Test Overview
+
+The repository includes comprehensive test files to ensure the correctness, consistency, and stability of the implemented algorithms:
+
+### 1. **test_generate_samples.py**
+
+#### Purpose:
+This file tests the functionality of Monte Carlo Hamiltonian steps and sample generation.
+
+#### Key Tests:
+- **`generate_samples` Function**: Ensures that the generated samples (`θ`, `y`, `Z`) have the correct shapes based on the provided parameters.
+- **Hamiltonian Monte Carlo Steps**:
+  - Validates the correctness of `full_step_A`, `full_step_B`, and `leapfrog_step` by checking output dimensions and symplectic properties.
+  - Tests energy conservation during leapfrog integration by comparing the initial and final Hamiltonian values.
+  - Confirms reversibility of the leapfrog integrator.
+  - Verifies the functionality of the Metropolis-Hastings accept/reject step.
+- **`initialize_theta` Function**:
+  - Ensures the function generates initial parameters (`θ`) with the correct dimensions and consistent values when a fixed seed is used.
+
+---
+
+### 2. **test_log_likelihood.py**
+
+#### Purpose:
+This file tests the computation of log-likelihood and its gradients, focusing on correctness and consistency.
+
+#### Key Tests:
+- **Component Functions**:
+  - Validates the shapes, types, and values of outputs for functions such as `generate_X`, `compute_logg`, `compute_logf_components`, and `compute_logq`.
+- **Normalized Weights**:
+  - Ensures that computed weights are normalized and sum to 1.
+- **Log Prior and Posterior**:
+  - Verifies the correctness of computed log prior and posterior values.
+- **Automatic vs. Manual Implementation**:
+  - Compares the results of `compute_log_likelihood_and_gradients_auto` (automatic differentiation) and `compute_manual` (manual computation) for consistency.
+- **Gradient Consistency**:
+  - Confirms that the gradients computed via TensorFlow's `GradientTape` match those from the custom implementation.
+
+---
+
+### 3. **test_pm_hmc_steps.py**
+
+#### Purpose:
+This file tests the implementation of Preconditioned Monte Carlo Hamiltonian (PM-HMC) steps.
+
+#### Key Tests:
+- **Hamiltonian Steps**:
+  - Ensures the correctness of input/output shapes for `full_step_A`, `full_step_B`, and `leapfrog_step`.
+- **Energy Conservation**:
+  - Validates that the Hamiltonian remains conserved during integration.
+- **Reversibility**:
+  - Confirms that forward and backward integration return to the original state.
+- **Metropolis-Hastings**:
+  - Tests the correctness of the accept/reject step and ensures state consistency.
+- **Full PM-HMC Iteration**:
+  - Runs complete iterations of PM-HMC and verifies output shapes and finite values.
+
+---
+
+### 4. **test_nuts.py**
+
+#### Purpose:
+This file tests the No-U-Turn Sampler (NUTS) implementation.
+
+#### Key Tests:
+- **Single Leapfrog Update**:
+  - Checks the correctness of shapes and values for single update steps.
+- **Tree Building**:
+  - Tests the base case (`j=0`) of the `build_tree` function to ensure correctness in sampling.
+- **NUTS Sampling**:
+  - Validates the complete NUTS sampling process, including shapes and acceptance rates.
+- **Determinism**:
+  - Ensures deterministic behavior when a fixed random seed is used.
+
+---
+
+### 5. **test_hnn.py**
+
+#### Purpose:
+This file tests the architecture and functionality of the Hamiltonian Neural Network (HNN).
+
+#### Key Tests:
+- **Model Initialization**:
+  - Verifies that the HNN can be initialized with different activation functions.
+- **Forward Pass**:
+  - Tests the forward pass in both training and inference modes, ensuring correct output shapes and finite values.
+- **Gradient Computation**:
+  - Validates the gradients of the Hamiltonian with respect to `θ` and `ρ`.
+- **Batch Consistency**:
+  - Confirms model behavior remains consistent across different batch sizes.
+- **Dropout Behavior**:
+  - Tests dropout functionality in training and inference modes to ensure variability during training and consistency during inference.
+
+---
+
+### 6. **test_hnn_training_data.py**
+
+#### Purpose:
+This file tests the collection of training data for the HNN using Hamiltonian trajectories.
+
+#### Key Tests:
+- **Single Trajectory Collection**:
+  - Verifies the correctness of shapes and values for collected trajectory data.
+- **Chain Samples Collection**:
+  - Tests the collection of samples along a Markov chain.
+- **Full Training Data Collection**:
+  - Validates the entire process of generating training datasets, ensuring correct shapes and inclusion of all required components.
+
+---
+
+### 7. **test_hnn_hmc.py**
+
+#### Purpose:
+This file tests the integration of HNN with Hamiltonian Monte Carlo (HMC) sampling.
+
+#### Key Tests:
+- **Directory Setup**:
+  - Ensures the required directories for logging and figures are correctly created.
+- **Parameter Trace Plotting**:
+  - Tests the generation of parameter trace plots during sampling.
+- **Leapfrog Integration**:
+  - Validates the correctness of the leapfrog integration process.
+- **Metropolis Step**:
+  - Tests the accept/reject step for HMC sampling.
+- **Full HNN-HMC Sampling**:
+  - Runs the entire HNN-HMC sampling process and verifies the outputs, including posterior means and acceptance rates.
+- **Hamiltonian Conservation**:
+  - Tests energy conservation during HMC sampling with varying step sizes.
+
+---
+
 ## How to Run
 
 1. Set up the environment using Python 3.8 and install the required libraries.
