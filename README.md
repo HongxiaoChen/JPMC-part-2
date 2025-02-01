@@ -6,7 +6,7 @@ This repository extends the work presented in *"Pseudo-marginal Hamiltonian Mont
 
 ## Environment
 
-The code is written in **Python 3.8** and requires the same environment setup as the original work, including necessary libraries and dependencies.
+The code is written in **Python 3.8** and requires TensorFlow 2.1x, including necessary libraries and dependencies.
 
 ---
 
@@ -50,12 +50,10 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
 
 1. Set up the environment using Python 3.8 and install the required libraries.
 2. Navigate to the **`codes/`** folder to access the core scripts and modules.
-3. Use **`generate_samples.py`** to generate observed data.
-4. Train the Hamiltonian Neural Networks using the pipeline:
-   - **`collect_hamiltonian_trajectories.py`** to gather training data.
+3. Train the Hamiltonian Neural Networks using the pipeline:
    - **`train_hnn_hamiltonian.py`** to train the HNN.
-5. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**.
-6. Check logs and figures in the respective folders for results.
+4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**.
+5. Check logs and figures in the respective folders for results.
 
 ---
 
