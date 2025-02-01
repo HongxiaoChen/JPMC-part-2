@@ -3,7 +3,7 @@ from log_likelihood_auto import compute_log_likelihood_and_gradients_auto as com
 #from log_likelihood_stable import compute_log_likelihood_and_gradients
 from log_likelihood_auto import compute_log_posterior
 from params import USE_HNN, DATA_PARAMS, MCMC_PARAMS, HNN_WEIGHTS_PATH
-from nn_architectures import HNN
+from hnn_architectures import HNN
 
 
 def initialize_hnn():

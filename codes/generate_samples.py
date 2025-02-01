@@ -8,6 +8,19 @@ def generate_samples(T, n, num_features):
     Returns:
         tuple: (Y, X, Z, beta) tensors
     """
+    # Check if inputs are integers
+    if not isinstance(T, int) or not isinstance(n, int) or not isinstance(num_features, int):
+        raise tf.errors.InvalidArgumentError(
+            None, None,
+            f"All inputs must be integers, got types: T={type(T)}, n={type(n)}, num_features={type(num_features)}"
+        )
+
+    if T <= 0 or n <= 0:
+        raise tf.errors.InvalidArgumentError(
+            None, None,
+            f"T and n must be positive integers, got T={T}, n={n}"
+        )
+
     generator = tf.random.Generator.from_seed(42)
     # 1. Initialize beta and Z
     beta = generator.normal([num_features], mean=0.0, stddev=1.0)  # shape: [8]

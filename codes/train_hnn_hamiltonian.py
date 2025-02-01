@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from generate_samples import generate_samples
 from collect_hamiltonian_trajectories import collect_training_data
-from nn_architectures_hamiltonian import HNN
+from hnn_architectures import HNN
 from params import DATA_PARAMS, MCMC_PARAMS, TRAJ_PARAMS, NN_PARAMS, TRAIN_PARAMS
 
 

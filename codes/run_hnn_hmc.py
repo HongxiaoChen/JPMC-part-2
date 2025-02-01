@@ -168,8 +168,7 @@ def metropolis_step(model, theta, rho, theta_new, rho_new):
 
     # Compute acceptance probability
     delta_H = H_current - H_proposed
-    #accept_prob = tf.minimum(1.0, tf.exp(delta_H))
-    accept_prob = tf.minimum(1.0, 0.7)
+    accept_prob = tf.minimum(1.0, tf.exp(delta_H)) * 0.7
 
     # Accept/reject
     uniform = tf.random.uniform([])

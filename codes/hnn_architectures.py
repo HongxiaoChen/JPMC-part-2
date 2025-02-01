@@ -47,9 +47,26 @@ class HNN(tf.keras.Model):
 
         Returns:
             hamiltonian: Shape [batch], sum of 20 output components
+
+        Raises:
+            ValueError: If inputs dimensions don't match or inputs are invalid
         """
-        # Unpack inputs
+        # Input validation
+        if not isinstance(inputs, (list, tuple)) or len(inputs) != 2:
+            raise ValueError("Inputs must be a list or tuple containing [theta, rho]")
+
         theta, rho = inputs
+
+        # Check if inputs are valid tensors
+        if not (isinstance(theta, tf.Tensor) and isinstance(rho, tf.Tensor)):
+            raise ValueError("Both theta and rho must be tensorflow tensors")
+
+        # Check shape compatibility
+        if theta.shape != rho.shape:
+            raise ValueError(f"Shape mismatch: theta shape {theta.shape} != rho shape {rho.shape}")
+
+        if len(theta.shape) != 2:
+            raise ValueError(f"Inputs must be 2D tensors, got theta shape {theta.shape}")
 
         # Concatenate inputs
         x = tf.concat([theta, rho], axis=-1)  # [batch, 26]
@@ -97,78 +114,3 @@ class HNN(tf.keras.Model):
 
         return hamiltonian, grad_theta, grad_rho
 
-
-# Test code
-if __name__ == "__main__":
-    import numpy as np
-
-    print("========== HamiltonianNN Dimension Test ==========")
-
-    # Create test data
-    batch_size = 32
-    input_dim = DATA_PARAMS['NUM_FEATURES'] + 5  # theta dimension: random features + 5 fixed parameters
-    test_theta = tf.random.normal([batch_size, input_dim])
-    test_rho = tf.random.normal([batch_size, input_dim])
-
-    print(f"\n1. Input Dimension Check:")
-    print(f"theta shape: {test_theta.shape}")
-    print(f"rho shape: {test_rho.shape}")
-    print(f"- batch_size: {batch_size}")
-    print(f"- input_dim: {input_dim} (NUM_FEATURES={DATA_PARAMS['NUM_FEATURES']}, fixed params=5)")
-
-    # Test all activation functions
-    activations = ['relu', 'tanh', 'sin']
-
-    for act in activations:
-        print(f"\n2. Testing activation {act}:")
-
-        # Initialize model
-        hnn = HNN(activation=act, dropout_rate=0.2)
-
-        # Test forward pass
-        # Test both training and inference modes
-        print("\nForward Pass Test:")
-        for training in [True, False]:
-            mode = "Training" if training else "Inference"
-            hamiltonian = hnn([test_theta, test_rho], training=training)
-            print(f"\n{mode} mode:")
-            print(f"- Hamiltonian shape: {hamiltonian.shape}")
-            print(f"- Hamiltonian range: [{tf.reduce_min(hamiltonian):.4f}, {tf.reduce_max(hamiltonian):.4f}]")
-
-        # Test gradient computation
-        hamiltonian, grad_theta, grad_rho = hnn.compute_gradients(test_theta, test_rho, training=False)
-        print("\nGradient Computation Test:")
-        print(f"- Output hamiltonian shape: {hamiltonian.shape}")
-        print(f"- Output grad_theta shape: {grad_theta.shape}")
-        print(f"- Output grad_rho shape: {grad_rho.shape}")
-
-        # Verify gradient dimensions match input dimensions
-        assert grad_theta.shape == test_theta.shape, \
-            f"Gradient theta shape {grad_theta.shape} doesn't match input shape {test_theta.shape}!"
-        assert grad_rho.shape == test_rho.shape, \
-            f"Gradient rho shape {grad_rho.shape} doesn't match input shape {test_rho.shape}!"
-
-        # Check numerical validity
-        print("\nNumerical Validity Check:")
-        print(f"- Hamiltonian contains NaN: {tf.reduce_any(tf.math.is_nan(hamiltonian)).numpy()}")
-        print(f"- grad_theta contains NaN: {tf.reduce_any(tf.math.is_nan(grad_theta)).numpy()}")
-        print(f"- grad_rho contains NaN: {tf.reduce_any(tf.math.is_nan(grad_rho)).numpy()}")
-        print(f"- grad_theta range: [{tf.reduce_min(grad_theta):.4f}, {tf.reduce_max(grad_theta):.4f}]")
-        print(f"- grad_rho range: [{tf.reduce_min(grad_rho):.4f}, {tf.reduce_max(grad_rho):.4f}]")
-
-        # Test batch dimension consistency
-        single_theta = tf.random.normal([1, input_dim])
-        single_rho = tf.random.normal([1, input_dim])
-        single_hamiltonian = hnn([single_theta, single_rho], training=False)
-        print("\nBatch Dimension Consistency Test:")
-        print(f"- Single input theta shape: {single_theta.shape}")
-        print(f"- Single input rho shape: {single_rho.shape}")
-        print(f"- Single output shape: {single_hamiltonian.shape}")
-
-        # Verify model trainability
-        trainable_vars = hnn.trainable_variables
-        print(f"\nModel Trainable Parameters:")
-        print(f"- Number of parameter tensors: {len(trainable_vars)}")
-        print(f"- Total parameters: {np.sum([np.prod(v.shape) for v in trainable_vars])}")
-
-        print("\n" + "=" * 50)
