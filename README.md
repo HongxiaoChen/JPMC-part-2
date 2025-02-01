@@ -6,7 +6,7 @@ This repository extends the work presented in *"Pseudo-marginal Hamiltonian Mont
 
 ## Environment
 
-The code is written in **Python 3.8** and requires the same environment setup as the original work, including necessary libraries and dependencies.
+The code is written in **Python 3.8** and requires TensorFlow 2.1x, including necessary libraries and dependencies.
 
 ---
 
