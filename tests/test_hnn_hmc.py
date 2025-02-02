@@ -66,6 +66,67 @@ class TestHNNHMC(unittest.TestCase):
         if self.mock_weights_path.exists():
             self.mock_weights_path.unlink()
 
+    def cleanup_directories(self):
+        """Helper method to clean up all test-related directories"""
+        directories_to_clean = [
+            'test_log',
+            'test_figures',
+            'log',
+            'figures'
+        ]
+
+        for directory in directories_to_clean:
+            dir_path = self.current_dir / directory
+            if dir_path.exists():
+                try:
+                    shutil.rmtree(dir_path)
+                except Exception as e:
+                    print(f"Warning: Failed to remove directory {directory}: {e}")
+
+    def test_ensure_directories(self):
+        """Test directory creation"""
+        # Change to test directory
+        original_dir = os.getcwd()
+        os.chdir(str(self.current_dir))
+
+        try:
+            ensure_directories()
+
+            # Verify directories were created
+            for directory in ['log', 'figures']:
+                self.assertTrue(Path(directory).exists())
+                self.assertTrue(Path(directory).is_dir())
+        finally:
+            # Restore original directory
+            os.chdir(original_dir)
+
+    def test_plot_parameter_traces(self):
+        """Test parameter trace plotting"""
+        try:
+            # Create figures directory if it doesn't exist
+            figures_dir = self.current_dir / 'figures'
+            figures_dir.mkdir(exist_ok=True)
+
+            # Change working directory to test directory temporarily
+            original_dir = os.getcwd()
+            os.chdir(str(self.current_dir))
+
+            try:
+                plot_parameter_traces(
+                    self.test_samples,
+                    h=MCMC_PARAMS['H'],
+                    L=MCMC_PARAMS['L'],
+                    rho_size=MCMC_PARAMS['RHO_SIZE']
+                )
+                # Check if figure was created
+                figures = list(Path('figures').glob('parameter_traces_*.png'))
+                self.assertTrue(len(figures) > 0)
+            finally:
+                # Restore original working directory
+                os.chdir(original_dir)
+
+        except Exception as e:
+            self.fail(f"Plot generation failed with error: {str(e)}")
 
     def test_leapfrog_steps(self):
         """Test leapfrog integration"""
@@ -172,7 +233,7 @@ class TestHNNHMC(unittest.TestCase):
         rho = tf.random.normal([self.feature_dim])
 
         # Test different step sizes
-        step_sizes = [0.01, 0.1, 0.25]
+        step_sizes = [0.01, 0.1, 0.5, 1.0]
         L = MCMC_PARAMS['L']
         for h in step_sizes:
             # Initial Hamiltonian
