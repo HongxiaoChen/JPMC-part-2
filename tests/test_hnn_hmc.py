@@ -15,6 +15,8 @@ import tensorflow as tf
 import numpy as np
 import shutil
 import os
+import logging
+import time
 from codes.run_hnn_hmc import (
     setup_logger,
     ensure_directories,
@@ -35,6 +37,12 @@ class TestHNNHMC(unittest.TestCase):
         # Define project paths
         self.current_dir = Path(__file__).parent
         self.project_root = self.current_dir.parent
+
+        # Store logger for cleanup
+        self.logger = None
+
+        # Close all existing loggers
+        self._close_all_loggers()
 
         # Clean up any existing test directories first
         self.cleanup_directories()
@@ -58,16 +66,35 @@ class TestHNNHMC(unittest.TestCase):
         # Add HNN_WEIGHTS_PATH to MCMC_PARAMS
         MCMC_PARAMS['HNN_WEIGHTS_PATH'] = str(self.mock_weights_path)
 
-    def tearDown(self):
-        """Clean up test artifacts and ensure no residual files"""
-        self.cleanup_directories()
+    def _close_all_loggers(self):
+        """Helper method to close all logger handlers"""
+        # Close all handlers from the root logger
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            try:
+                handler.close()
+                root_logger.removeHandler(handler)
+            except Exception as e:
+                print(f"Warning: Failed to close handler: {e}")
 
-        # Remove mock weights file
-        if self.mock_weights_path.exists():
-            self.mock_weights_path.unlink()
+        # Get all existing loggers
+        for logger_name in logging.root.manager.loggerDict:
+            logger = logging.getLogger(logger_name)
+            for handler in logger.handlers[:]:
+                try:
+                    handler.close()
+                    logger.removeHandler(handler)
+                except Exception as e:
+                    print(f"Warning: Failed to close handler for logger {logger_name}: {e}")
 
     def cleanup_directories(self):
         """Helper method to clean up all test-related directories"""
+        # First close all loggers
+        self._close_all_loggers()
+
+        # Give system some time to release file handles
+        time.sleep(0.5)
+
         directories_to_clean = [
             'test_log',
             'test_figures',
@@ -79,9 +106,32 @@ class TestHNNHMC(unittest.TestCase):
             dir_path = self.current_dir / directory
             if dir_path.exists():
                 try:
-                    shutil.rmtree(dir_path)
+                    # Try to remove files first
+                    for file_path in dir_path.glob('*'):
+                        try:
+                            if file_path.is_file():
+                                file_path.unlink(missing_ok=True)
+                        except Exception as e:
+                            print(f"Warning: Failed to remove file {file_path}: {e}")
+
+                    # Then try to remove directory
+                    shutil.rmtree(dir_path, ignore_errors=True)
                 except Exception as e:
                     print(f"Warning: Failed to remove directory {directory}: {e}")
+
+    def tearDown(self):
+        """Clean up test artifacts and ensure no residual files"""
+        # Close logger if it exists
+        if self.logger:
+            for handler in self.logger.handlers[:]:
+                handler.close()
+                self.logger.removeHandler(handler)
+
+        self.cleanup_directories()
+
+        # Remove mock weights file
+        if self.mock_weights_path.exists():
+            self.mock_weights_path.unlink()
 
     def test_ensure_directories(self):
         """Test directory creation"""
@@ -208,6 +258,9 @@ class TestHNNHMC(unittest.TestCase):
                  posterior_mean_mu, posterior_mean_lambda,
                  posterior_mean_w, logger) = results
 
+                # Store logger for cleanup
+                self.logger = logger
+
                 # Check outputs
                 self.assertEqual(samples.shape[0], test_params['M'] - test_params['BURN_IN'])
                 self.assertEqual(samples.shape[1], self.feature_dim)
@@ -271,6 +324,28 @@ class TestHNNHMC(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up after all tests have completed"""
+        # Close all loggers
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            try:
+                handler.close()
+                root_logger.removeHandler(handler)
+            except Exception as e:
+                print(f"Warning: Failed to close handler: {e}")
+
+        # Close all other logger handlers
+        for logger_name in logging.root.manager.loggerDict:
+            logger = logging.getLogger(logger_name)
+            for handler in logger.handlers[:]:
+                try:
+                    handler.close()
+                    logger.removeHandler(handler)
+                except Exception as e:
+                    print(f"Warning: Failed to close handler for logger {logger_name}: {e}")
+
+        # Give system some time to release file handles
+        time.sleep(0.5)
+
         current_dir = Path(__file__).parent
         directories_to_clean = [
             'test_log',
@@ -283,7 +358,16 @@ class TestHNNHMC(unittest.TestCase):
             dir_path = current_dir / directory
             if dir_path.exists():
                 try:
-                    shutil.rmtree(dir_path)
+                    # Try to remove files first
+                    for file_path in dir_path.glob('*'):
+                        try:
+                            if file_path.is_file():
+                                file_path.unlink(missing_ok=True)
+                        except Exception as e:
+                            print(f"Warning: Failed to remove file {file_path}: {e}")
+
+                    # Then try to remove directory
+                    shutil.rmtree(dir_path, ignore_errors=True)
                 except Exception as e:
                     print(f"Warning: Failed to remove directory {directory}: {e}")
 

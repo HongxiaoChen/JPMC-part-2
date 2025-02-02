@@ -86,7 +86,7 @@ TRAIN_PARAMS = {
 USE_HNN = False  # True for HNN mode, False for traditional mode. Use False during training for data collection
 
 # HNN weights path (without file extension)
-HNN_WEIGHTS_PATH = 'ckpt/weights_hamiltonian_20250130_222240'  # 128 Hidden
+HNN_WEIGHTS_PATH = 'ckpt/weights_hamiltonian_20250201_212453'  # 128 Hidden
 
 # NUTS parameters
 NUTS_PARAMS = {
@@ -104,7 +104,6 @@ NUTS_PARAMS = {
 }
 
 
-@tf.function
 def initialize_theta(seed=50):
     """
     Initialize theta according to INIT_PARAMS
