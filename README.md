@@ -30,6 +30,7 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
   - Hamiltonian computation.
   - Metropolis-Hastings acceptance criterion.
 - **`run_pm_hmc.py`**: Executes PM-HMC sampling.
+- **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
 - **`nuts_hnn_olm_complex.py`**: Contains the main structure for NUTS sampling, inspired by the PM-HMC framework.
 - **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
 
@@ -183,7 +184,7 @@ This file tests the integration of HNN with Hamiltonian Monte Carlo (HMC) sampli
 2. Navigate to the **`codes/`** folder to access the core scripts and modules.
 3. Train the Hamiltonian Neural Networks using the pipeline:
    - **`train_hnn_hamiltonian.py`** to train the HNN.
-4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**.
+4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**, or HNN-HMC sampling using **`run_hnn_hmc.py`**
 5. Check logs and figures in the respective folders for results.
 
 ---
