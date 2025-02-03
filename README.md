@@ -80,11 +80,7 @@ This file tests the functionality of Monte Carlo Hamiltonian steps and sample ge
 
 #### Key Tests:
 - **`generate_samples` Function**: Ensures that the generated samples (`θ`, `y`, `Z`) have the correct shapes based on the provided parameters.
-- **Hamiltonian Monte Carlo Steps**:
-  - Validates the correctness of `full_step_A`, `full_step_B`, and `leapfrog_step` by checking output dimensions and symplectic properties.
-  - Tests energy conservation during leapfrog integration by comparing the initial and final Hamiltonian values.
-  - Confirms reversibility of the leapfrog integrator.
-  - Verifies the functionality of the Metropolis-Hastings accept/reject step.
+
 - **`initialize_theta` Function**:
   - Ensures the function generates initial parameters (`θ`) with the correct dimensions and consistent values when a fixed seed is used.
 
