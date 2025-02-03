@@ -167,7 +167,7 @@ def metropolis_step(model, theta, rho, theta_new, rho_new):
     H_proposed = tf.squeeze(H_proposed, 0)
 
     # Compute acceptance probability
-    delta_H = H_current - H_proposed
+    delta_H = H_proposed - H_current
     accept_prob = tf.minimum(1.0, tf.exp(delta_H))
 
     # Accept/reject

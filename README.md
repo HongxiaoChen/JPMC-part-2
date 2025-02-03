@@ -6,6 +6,17 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ---
 
+## How to Run
+
+1. Set up the environment using Python 3.8 and install the required libraries.
+2. Navigate to the **`codes/`** folder to access the core scripts and modules.
+3. Train the Hamiltonian Neural Networks using the pipeline:
+   - **`train_hnn_hamiltonian.py`** to train the HNN.
+4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**, or HNN-HMC sampling using **`run_hnn_hmc.py`**
+5. Check logs and figures in the respective folders for results.
+
+---
+
 ## Running Tests
 
 To run tests, navigate to the `tests` directory and use the command line:
@@ -186,17 +197,6 @@ This file tests the integration of HNN with Hamiltonian Monte Carlo (HMC) sampli
   - Runs the entire HNN-HMC sampling process and verifies the outputs, including posterior means and acceptance rates.
 - **Hamiltonian Conservation**:
   - Tests energy conservation during HMC sampling with varying step sizes.
-
----
-
-## How to Run
-
-1. Set up the environment using Python 3.8 and install the required libraries.
-2. Navigate to the **`codes/`** folder to access the core scripts and modules.
-3. Train the Hamiltonian Neural Networks using the pipeline:
-   - **`train_hnn_hamiltonian.py`** to train the HNN.
-4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**, or HNN-HMC sampling using **`run_hnn_hmc.py`**
-5. Check logs and figures in the respective folders for results.
 
 ---
 
