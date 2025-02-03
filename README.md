@@ -6,15 +6,6 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ---
 
-## Running Tests
-
-To run tests, navigate to the `tests` directory and use the command line:
-
-bash
-`python -m unittest discover -v `
-
----
-
 ## How to Run
 
 1. Set up the environment using Python 3.8 and install the required libraries.
@@ -23,6 +14,15 @@ bash
    - **`train_hnn_hamiltonian.py`** to train the HNN.
 4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**, or HNN-HMC sampling using **`run_hnn_hmc.py`**
 5. Check logs and figures in the respective folders for results.
+
+---
+
+## Running Tests
+
+To run tests, navigate to the `tests` directory and use the command line:
+
+bash
+`python -m unittest discover -v `
 
 ---
 
