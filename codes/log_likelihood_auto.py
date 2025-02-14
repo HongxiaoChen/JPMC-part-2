@@ -79,7 +79,7 @@ def compute_logf_components(X, mu1, mu2, log_lambda1, log_lambda2, eta):
 @tf.function
 def compute_logq(u):
     """
-    Compute log q_theta(X).
+    Compute log q_theta(X). Since X is a function of u, I use u as the instead input.
 
     Args:
         u: Auxiliary variables
@@ -143,7 +143,7 @@ def compute_log_posterior(theta_var, u_var, y, Z):
         Z: Covariates
 
     Returns:
-        float: Log likelihood value
+        float: Log likelihood value plus log prior
     """
     # Extract parameters
     p_z = tf.shape(Z)[-1]
@@ -188,7 +188,7 @@ def compute_log_likelihood_and_gradients_auto(theta, u, y, Z):
 
     Returns:
         tuple: (prior_log_likelihood, grad_u, grad_theta)
-            - prior_log_likelihood: Log likelihood value
+            - prior_log_likelihood: Log likelihood value + log prior
             - grad_u: Gradient with respect to auxiliary variables
             - grad_theta: Gradient with respect to parameters
     """
