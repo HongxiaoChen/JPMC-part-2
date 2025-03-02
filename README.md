@@ -19,16 +19,7 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ## Running Tests
 
-To run tests, navigate to the `tests` directory and use the command line:
-
-bash
-`python -m unittest discover -v `
-
----
-
-## Environment
-
-The code is written in **Python 3.8** and requires TensorFlow 2.1x, including necessary libraries and dependencies.
+To run tests, navigate to the `tests` directory 
 
 ---
 
