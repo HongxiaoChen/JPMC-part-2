@@ -8,7 +8,7 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ## How to Run
 
-1. Set up the environment using Python 3.8 and install the required libraries.
+1. Set up the environment using Python 3.11 and install TensorFlow 2.15.
 2. Navigate to the **`codes/`** folder to access the core scripts and modules.
 3. Train the Hamiltonian Neural Networks using the pipeline:
    - **`train_hnn_hamiltonian.py`** to train the HNN.
