@@ -2,7 +2,7 @@
 
 This repository extends the work presented in *"Pseudo-marginal Hamiltonian Monte Carlo"* by **Johan Alenlöv, Arnaud Doucet, and Fredrik Lindsten**. Specifically, it integrates **No-U-Turn Sampling (NUTS)** and **Hamiltonian Neural Networks (HNN)** into the pseudo-marginal Hamiltonian Monte Carlo (PM-HMC) framework.
 
-Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/HongxiaoChen/JPMC-part-1).
+Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/HongxiaoChen/JPMC-part-1-modified).
 
 ---
 
