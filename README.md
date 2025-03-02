@@ -23,6 +23,8 @@ To run tests, navigate to the `tests` directory. Run tests using:
 
 ```bash
 python -m unittest discover -v
+```
+
 
 ---
 
