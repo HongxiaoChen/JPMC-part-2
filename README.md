@@ -191,7 +191,3 @@ This file tests the integration of HNN with Hamiltonian Monte Carlo (HMC) sampli
   - Tests energy conservation during HMC sampling with varying step sizes.
 
 ---
-
-## Notes
-
-This repository integrates methodologies for advanced Bayesian inference and Hamiltonian dynamics modeling. For any issues or questions, feel free to raise an issue or contribute to the repository.
