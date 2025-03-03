@@ -19,7 +19,7 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ## Running Tests
 
-To run tests, navigate to the `tests` directory. Run tests using:
+To run tests, use the command from the root directory:
 
 ```bash
 python -m unittest discover -v
