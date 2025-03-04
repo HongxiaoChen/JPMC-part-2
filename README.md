@@ -12,7 +12,10 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 2. Navigate to the **`codes/`** folder to access the core scripts and modules.
 3. Train the Hamiltonian Neural Networks using the pipeline:
    - **`train_hnn_hamiltonian.py`** to train the HNN.
-4. Run PM-HMC sampling using **`run_pm_hmc.py`** or NUTS sampling using **`run_pm_hmc_nuts_complex.py`**, or HNN-HMC sampling using **`run_hnn_hmc.py`**
+4. Use the following files to replicate results:
+   - Run PM-HMC sampling using **`run_pm_hmc.py`** 
+   - Run NUTS sampling using **`run_pm_hmc_nuts_complex.py`**
+   - RunHNN-HMC sampling using **`run_hnn_hmc.py`**
 5. Check logs and figures in the respective folders for results.
 
 ---
