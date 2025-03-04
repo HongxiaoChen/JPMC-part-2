@@ -32,8 +32,7 @@ python -m unittest discover -v
 
 The main code files are stored in the **`codes/`** directory. Below is a detailed description of the key files and their functionality:
 
-### Core Files
-- **`generate_samples.py`**: Generates observed data for the model.
+### Log-probability files
 - **`log_likelihood_auto.py`**: Computes the log-likelihood and its gradient using auto-differentiation.
 - **`log_likelihood_stable.py`**: Computes the log-likelihood and explicitly expresses the gradient.
 
@@ -43,14 +42,17 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
 - **`train_hnn_hamiltonian.py`**: Trains the Hamiltonian Neural Networks.
 
 ### Sampling
-- **`pm_hmc_steps.py`**: Implements PM-HMC sampling steps, including:
+- **`run_pm_hmc.py`**: Executes PM-HMC sampling.
+- **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
+- **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
+
+### Utilities
+- **`pm_hmc_steps.py`**: Contains functions for performing PM-HMC sampling steps, including:
   - Strang splitting for solving Hamiltonian dynamics.
   - Hamiltonian computation.
   - Metropolis-Hastings acceptance criterion.
-- **`run_pm_hmc.py`**: Executes PM-HMC sampling.
-- **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
 - **`nuts_hnn_olm_complex.py`**: Contains the main structure for NUTS sampling, inspired by the PM-HMC framework.
-- **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
+- **`generate_samples.py`**: Generates observed data for the model.
 
 ### Parameters
 - **`params.py`**: Stores all the parameters required for the project.
