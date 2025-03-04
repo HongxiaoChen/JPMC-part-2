@@ -134,7 +134,7 @@ def compute_log_prior(theta):
 @tf.function
 def compute_log_posterior(theta_var, u_var, y, Z):
     """
-    Compute log likelihood.
+    Compute log prior + log likelihood.
 
     Args:
         theta_var: Parameter vector
@@ -197,8 +197,8 @@ def compute_log_likelihood_and_gradients_auto(theta, u, y, Z):
         tape.watch(theta)
         tape.watch(u)
 
-        # Compute log likelihood
-        prior_log_likelihood = compute_log_posterior(theta, u, y, Z)
+        # Compute log prior +log likelihood
+        log_prior_log_likelihood = compute_log_posterior(theta, u, y, Z)
 
     # Compute gradients using automatic differentiation
     grad_theta = tape.gradient(prior_log_likelihood, theta)
@@ -206,4 +206,4 @@ def compute_log_likelihood_and_gradients_auto(theta, u, y, Z):
 
     del tape
 
-    return prior_log_likelihood, grad_u, grad_theta
+    return log_prior_log_likelihood, grad_u, grad_theta
