@@ -14,8 +14,8 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
    - **`train_hnn_hamiltonian.py`** to train the HNN.
 4. Use the following files to replicate results:
    - Run PM-HMC sampling using **`run_pm_hmc.py`** 
-   - Run NUTS sampling using **`run_pm_hmc_nuts_complex.py`**
-   - RunHNN-HMC sampling using **`run_hnn_hmc.py`**
+   - Run PM-NUTS sampling using **`run_pm_hmc_nuts_complex.py`**
+   - Run HNN-HMC sampling using **`run_hnn_hmc.py`**
 5. Check logs and figures in the respective folders for results.
 
 ---
