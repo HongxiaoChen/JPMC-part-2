@@ -91,7 +91,7 @@ def plot_parameter_traces(samples, h, L, rho_size):
     plt.suptitle(
         'HNN-HMC - '
         'Traces for parameters μ₁ and μ₂ (left) and 1/λ₁ and 1/λ₂ (right)\n'
-        f'HNN-HMC sampler with h = {h}, L = {L}, ρ = {rho_size}\n'
+        f'HNN-HMC sampler with h = {h}, L = {L}\n'
         f'Total steps per iteration = {h * L:.4f}'
     )
 
