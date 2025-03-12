@@ -201,8 +201,8 @@ def compute_log_likelihood_and_gradients_auto(theta, u, y, Z):
         log_prior_log_likelihood = compute_log_posterior(theta, u, y, Z)
 
     # Compute gradients using automatic differentiation
-    grad_theta = tape.gradient(prior_log_likelihood, theta)
-    grad_u = tape.gradient(prior_log_likelihood, u)
+    grad_theta = tape.gradient(log_prior_log_likelihood, theta)
+    grad_u = tape.gradient(log_prior_log_likelihood, u)
 
     del tape
 
