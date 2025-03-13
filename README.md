@@ -51,7 +51,7 @@ Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which
 
 ### Sampling
 - **`run_tfp_pm_hmc.py`**: Executes PM-HMC sampling using modified TFP transition Kernels
-- **`run_pm_hmc.py`**: Executes PM-HMC sampling.
+- **`run_pm_hmc.py`**: Executes PM-HMC sampling, which produces identical results w.r.t PM-HMC sampling using TFP.
 - **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
 - **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
 
