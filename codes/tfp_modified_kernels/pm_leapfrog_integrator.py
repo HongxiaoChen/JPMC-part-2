@@ -120,10 +120,9 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
             
             # Execute num_steps complete Leapfrog steps
             for step_idx in range(self.num_steps):
-                #################################
-                # Half step A: Update position (theta, u)
-                #################################
                 
+                # Half step A: Update position (theta, u)
+                               
                 # Apply half-step update to theta
                 half_theta = current_theta + _multiply(half_step * (1.0 / self.rho_size), current_rho, dtype=current_theta.dtype)
                 
@@ -131,10 +130,9 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
                 half_u_flat = current_u_flat * cos_term + current_p_flat * sin_term
                 half_p_flat = current_p_flat * cos_term - current_u_flat * sin_term
                 
-                #################################
-                # Full step B: Update momentum (rho, p)
-                #################################
                 
+                # Full step B: Update momentum (rho, p)
+                               
                 # Calculate gradients (at half-step position)
                 with tf.GradientTape(persistent=True) as tape:
                     tape.watch(half_theta)
@@ -151,11 +149,9 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
                 # Update momentum (full step)
                 new_rho = current_rho + _multiply(step_size, grad_theta, dtype=current_rho.dtype)
                 new_p_flat = half_p_flat + _multiply(step_size, grad_u_flat, dtype=half_p_flat.dtype)
-                
-                #################################
+                               
                 # Half step A: Update position (theta, u)
-                #################################
-                
+                               
                 # Apply half-step update to theta
                 new_theta = half_theta + _multiply(half_step * (1.0 / self.rho_size), new_rho, dtype=half_theta.dtype)
                 
