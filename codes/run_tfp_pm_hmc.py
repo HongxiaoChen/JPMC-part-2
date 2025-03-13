@@ -167,7 +167,7 @@ def run_pm_hmc_sampling():
         os.makedirs('figures')
     
     # Create a figure to display sampled parameters
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(12, 7))
     
     # Trace plot of mu1 and mu2
     plt.subplot(1, 2, 1)
