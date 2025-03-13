@@ -36,8 +36,7 @@ python -m unittest discover -v
 The main code files are stored in the **`codes/`** directory. Below is a detailed description of the key files and their functionality:
 
 ### Transition Kernels
-
-Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are:
+-- Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are
 -- **`pm_hmc.py`** that performs PM-HMC .
 -- **`pm_hmc_integrator.py`** that performs strang splitting.
 
