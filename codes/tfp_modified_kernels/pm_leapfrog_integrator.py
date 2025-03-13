@@ -22,15 +22,13 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
     3. Half step A: Update theta again and rotate (u,p)
     """
     
-    def __init__(self, target_fn, step_sizes, num_steps, T, N, rho_size=10.0):
+    def __init__(self, target_fn, step_sizes, num_steps, rho_size=10.0):
         """Initialize PMLeapfrogIntegrator
 
         Args:
-          target_fn: Target function that accepts joint state [theta, u_flat] and returns log probability
+          target_fn: Target function that accepts joint state [theta, u] and returns log probability
           step_sizes: Step size for leapfrog integrator
           num_steps: Number of leapfrog integration steps
-          T: First dimension of auxiliary variable u
-          N: Second dimension of auxiliary variable u
           rho_size: Scaling factor for theta momentum, default is 10.0
         """
         super(PMLeapfrogIntegrator, self).__init__(
@@ -39,23 +37,11 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
             num_steps=num_steps
         )
         self._rho_size = rho_size
-        self._T = T
-        self._N = N
     
     @property
     def rho_size(self):
         """Returns rho_size parameter"""
         return self._rho_size
-    
-    @property
-    def T(self):
-        """Returns first dimension T of auxiliary variable u"""
-        return self._T
-    
-    @property
-    def N(self):
-        """Returns second dimension N of auxiliary variable u"""
-        return self._N
     
     def __call__(self,
                 momentum_parts,
@@ -67,22 +53,22 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
         """Execute PM-HMC leapfrog steps
         
         Args:
-          momentum_parts: List containing two Tensors: [rho, p_flat]
+          momentum_parts: List containing two Tensors: [rho, p]
               rho: Momentum for theta, shape [D]
-              p_flat: Momentum for u_flat, shape [T*N]
-          state_parts: List containing two Tensors: [theta, u_flat]
+              p: Momentum for u, shape [T, N]
+          state_parts: List containing two Tensors: [theta, u]
               theta: Parameters, shape [D]
-              u_flat: Flattened auxiliary variables, shape [T*N]
+              u: Auxiliary variables, shape [T, N]
           target: Scalar Tensor representing joint state log probability
-          target_grad_parts: Gradient list [grad_theta, grad_u_flat]
+          target_grad_parts: Gradient list [grad_theta, grad_u]
           kinetic_energy_fn: Kinetic energy function (optional)
           name: Operation name
         
         Returns:
-          next_momentum_parts: [rho_new, p_flat_new], updated momentum
-          next_state_parts: [theta_new, u_flat_new], updated state
+          next_momentum_parts: [rho_new, p_new], updated momentum
+          next_state_parts: [theta_new, u_new], updated state
           next_target: Updated log probability
-          next_target_grad_parts: [grad_theta_new, grad_u_flat_new], updated gradients
+          next_target_grad_parts: [grad_theta_new, grad_u_new], updated gradients
         """
         with tf.name_scope(name or 'pm_leapfrog_integrate'):
             # Process input parameters
@@ -100,15 +86,12 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
 
             
             # Extract parameters and auxiliary variables
-            theta, u_flat = state_parts[0], state_parts[1]
-            rho, p_flat = momentum_parts[0], momentum_parts[1]
-            
-            # Use provided T and N
-            T, N = self.T, self.N
+            theta, u = state_parts[0], state_parts[1]
+            rho, p = momentum_parts[0], momentum_parts[1]
             
             # Initialize result variables
-            current_theta, current_u_flat = theta, u_flat
-            current_rho, current_p_flat = rho, p_flat
+            current_theta, current_u = theta, u
+            current_rho, current_p = rho, p
             current_target, current_target_grad_parts = target, target_grad_parts
             
             step_size = self.step_sizes[0]  # Assume all variables use the same step size
@@ -126,9 +109,9 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
                 # Apply half-step update to theta
                 half_theta = current_theta + _multiply(half_step * (1.0 / self.rho_size), current_rho, dtype=current_theta.dtype)
                 
-                # Apply rotation to u and p directly on flattened tensors
-                half_u_flat = current_u_flat * cos_term + current_p_flat * sin_term
-                half_p_flat = current_p_flat * cos_term - current_u_flat * sin_term
+                # Apply rotation to u and p directly
+                half_u = current_u * cos_term + current_p * sin_term
+                half_p = current_p * cos_term - current_u * sin_term
                 
                 
                 # Full step B: Update momentum (rho, p)
@@ -136,36 +119,36 @@ class PMLeapfrogIntegrator(leapfrog_impl.SimpleLeapfrogIntegrator):
                 # Calculate gradients (at half-step position)
                 with tf.GradientTape(persistent=True) as tape:
                     tape.watch(half_theta)
-                    tape.watch(half_u_flat)  # Directly use half_u_flat
-                    half_state = [half_theta, half_u_flat]
+                    tape.watch(half_u)
+                    half_state = [half_theta, half_u]
                     half_target = self.target_fn(*half_state)
                 
                 # Calculate gradients
                 grad_theta = tape.gradient(half_target, half_theta)
-                grad_u_flat = tape.gradient(half_target, half_u_flat)  # Gradient is also flattened
+                grad_u = tape.gradient(half_target, half_u)
                 del tape
                 
                 
                 # Update momentum (full step)
                 new_rho = current_rho + _multiply(step_size, grad_theta, dtype=current_rho.dtype)
-                new_p_flat = half_p_flat + _multiply(step_size, grad_u_flat, dtype=half_p_flat.dtype)
+                new_p = half_p + _multiply(step_size, grad_u, dtype=half_p.dtype)
                                
                 # Half step A: Update position (theta, u)
                                
                 # Apply half-step update to theta
                 new_theta = half_theta + _multiply(half_step * (1.0 / self.rho_size), new_rho, dtype=half_theta.dtype)
                 
-                # Apply rotation to u and p directly on flattened tensors
-                new_u_flat = half_u_flat * cos_term + new_p_flat * sin_term
-                new_p_flat = new_p_flat * cos_term - half_u_flat * sin_term
+                # Apply rotation to u and p
+                new_u = half_u * cos_term + new_p * sin_term
+                new_p = new_p * cos_term - half_u * sin_term
                 
                 # Update current state and momentum
-                current_theta, current_u_flat = new_theta, new_u_flat
-                current_rho, current_p_flat = new_rho, new_p_flat
+                current_theta, current_u = new_theta, new_u
+                current_rho, current_p = new_rho, new_p
             
             # Calculate final gradients and target function
-            next_state_parts = [current_theta, current_u_flat]
-            next_momentum_parts = [current_rho, current_p_flat]
+            next_state_parts = [current_theta, current_u]
+            next_momentum_parts = [current_rho, current_p]
             
             # Calculate new log probability and gradients
             next_target, next_target_grad_parts = mcmc_util.maybe_call_fn_and_grads(

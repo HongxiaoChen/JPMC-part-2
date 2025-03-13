@@ -31,8 +31,6 @@ class UncalibratedPMHMCKernelResults(
             'step_size',
             'num_leapfrog_steps',
             'rho_size',
-            'T',
-            'N',
             # Seed received by one_step, to reproduce divergent transitions etc.
             'seed',
         ])
@@ -49,9 +47,9 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
     useful for situations involving marginal likelihood estimation, such as 
     particle-based methods.
 
-    This class implements a single-step sampling of PM-HMC, handling joint state [theta, u_flat], where:
+    This class implements a single-step sampling of PM-HMC, handling joint state [theta, u], where:
     - theta is the model parameter
-    - u_flat is the flattened auxiliary variable
+    - u is the auxiliary variable with shape [T, N]
 
     Key differences between PM-HMC and standard HMC:
     1. Joint state includes parameters theta and auxiliary variables u
@@ -69,8 +67,6 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                 target_log_prob_fn,
                 step_size,
                 num_leapfrog_steps,
-                T,
-                N,
                 rho_size=10.0,
                 state_gradients_are_stopped=False,
                 store_parameters_in_results=False,
@@ -88,8 +84,6 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
           num_leapfrog_steps: Integer number of steps to run the leapfrog integrator
             for. Total progress per HMC step is roughly proportional to
             `step_size * num_leapfrog_steps`.
-          T: First dimension of auxiliary variable u
-          N: Second dimension of auxiliary variable u
           rho_size: Scaling factor for theta momentum, default is 10.0, affects momentum 
             generation and kinetic energy calculation.
           state_gradients_are_stopped: Python `bool` indicating whether gradients
@@ -111,8 +105,6 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
             target_log_prob_fn=target_log_prob_fn,
             step_size=step_size,
             num_leapfrog_steps=num_leapfrog_steps,
-            T=T,
-            N=N,
             rho_size=rho_size,
             state_gradients_are_stopped=state_gradients_are_stopped,
             name=name or 'pm_hmc_kernel',
@@ -133,16 +125,6 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
     def num_leapfrog_steps(self):
         """Returns the num_leapfrog_steps parameter"""
         return self._parameters['num_leapfrog_steps']
-
-    @property
-    def T(self):
-        """Returns the first dimension T of auxiliary variable u"""
-        return self._parameters['T']
-    
-    @property
-    def N(self):
-        """Returns the second dimension N of auxiliary variable u"""
-        return self._parameters['N']
 
     @property
     def rho_size(self):
@@ -175,8 +157,8 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
 
         Args:
           current_state: `Tensor` or Python `list` of `Tensor`s representing the
-            current state of the Markov chain, containing [theta, u_flat], where 
-            theta is the parameter and u_flat is the flattened auxiliary variable.
+            current state of the Markov chain, containing [theta, u], where 
+            theta is the parameter and u is the auxiliary variable with shape [T, N].
           previous_kernel_results: `collections.namedtuple` containing `Tensor`s
             representing values from previous calls to this function (or from the
             `bootstrap_results` function).
@@ -198,14 +180,10 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                 step_size = previous_kernel_results.step_size
                 num_leapfrog_steps = previous_kernel_results.num_leapfrog_steps
                 rho_size = previous_kernel_results.rho_size
-                T = previous_kernel_results.T
-                N = previous_kernel_results.N
             else:
                 step_size = self.step_size
                 num_leapfrog_steps = self.num_leapfrog_steps
                 rho_size = self.rho_size
-                T = self.T
-                N = self.N
 
             [
                 current_state_parts,
@@ -225,8 +203,11 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
             theta_seed, u_seed = samplers.split_seed(seed, n=2)
 
             # Extract parameter and auxiliary variable parts
-            theta, u_flat = current_state_parts
+            theta, u = current_state_parts
 
+            # Get shape of u
+            u_shape = ps.shape(u)
+            
             # Generate momentum
             current_theta_momentum = samplers.normal(
                 shape=ps.shape(theta),
@@ -234,15 +215,15 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                 seed=theta_seed) * tf.sqrt(rho_size)
 
             current_u_momentum = samplers.normal(
-                shape=ps.shape(u_flat),
-                dtype=dtype_util.base_dtype(u_flat.dtype),
+                shape=u_shape,
+                dtype=dtype_util.base_dtype(u.dtype),
                 seed=u_seed)
 
             current_momentum_parts = [current_theta_momentum, current_u_momentum]
 
-            # Create custom leapfrog integrator, passing T and N parameters
+            # Create custom leapfrog integrator
             integrator = PMLeapfrogIntegrator(
-                self.target_log_prob_fn, step_sizes, num_leapfrog_steps, T, N, rho_size)
+                self.target_log_prob_fn, step_sizes, num_leapfrog_steps, rho_size)
 
             [
                 next_momentum_parts,
@@ -263,7 +244,7 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
 
             # PM-HMC acceptance rate correction calculation
             # Here we need to consider three kinetic energy terms: theta kinetic energy, 
-            # u_flat kinetic energy, and momentum kinetic energy
+            # u kinetic energy, and momentum kinetic energy
             independent_chain_ndims = ps.rank(current_target_log_prob)
 
             # Calculate acceptance rate correction
@@ -298,10 +279,10 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                 init_grads_target_log_prob,
             ] = mcmc_util.maybe_call_fn_and_grads(self.target_log_prob_fn, init_state)
             
-            # Ensure we have two parts: theta and u_flat
+            # Ensure we have two parts: theta and u
             if len(init_state) != 2:
                 raise ValueError(
-                    "PM-HMC requires state to contain two parts: [theta, u_flat], "
+                    "PM-HMC requires state to contain two parts: [theta, u], "
                     f"but received {len(init_state)} parts."
                 )
                 
@@ -312,17 +293,15 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                 grads_target_log_prob=init_grads_target_log_prob,
                 initial_momentum=[
                     tf.zeros_like(init_state[0]),  # theta momentum (rho)
-                    tf.zeros_like(init_state[1]),  # u_flat momentum (p_flat)
+                    tf.zeros_like(init_state[1]),  # u momentum (p)
                 ],
                 final_momentum=[
                     tf.zeros_like(init_state[0]),  # theta momentum (rho)
-                    tf.zeros_like(init_state[1]),  # u_flat momentum (p_flat)
+                    tf.zeros_like(init_state[1]),  # u momentum (p)
                 ],
                 step_size=[],
                 num_leapfrog_steps=[],
                 rho_size=[],
-                T=[],
-                N=[],
                 seed=samplers.zeros_seed())
                 
             if self._store_parameters_in_results:
@@ -340,15 +319,7 @@ class UncalibratedPMHMC(kernel_base.TransitionKernel):
                     rho_size=tf.convert_to_tensor(
                         self.rho_size,
                         dtype=init_target_log_prob.dtype,
-                        name='rho_size'),
-                    T=tf.convert_to_tensor(
-                        self.T,
-                        dtype=tf.int32,
-                        name='T'),
-                    N=tf.convert_to_tensor(
-                        self.N,
-                        dtype=tf.int32,
-                        name='N')
+                        name='rho_size')
                 )
                         
             return result
@@ -376,8 +347,6 @@ class PMHMC(kernel_base.TransitionKernel):
                target_log_prob_fn,
                step_size,
                num_leapfrog_steps,
-               T,
-               N,
                rho_size=10.0,
                state_gradients_are_stopped=False,
                store_parameters_in_results=False,
@@ -391,8 +360,6 @@ class PMHMC(kernel_base.TransitionKernel):
           step_size: `Tensor` or Python `list` of `Tensor`s representing the step
             size for the leapfrog integrator.
           num_leapfrog_steps: Integer number of steps to run the leapfrog integrator.
-          T: First dimension of auxiliary variable u
-          N: Second dimension of auxiliary variable u
           rho_size: Scaling factor for theta momentum, default is 10.0
           state_gradients_are_stopped: Python `bool` indicating whether the proposed
             new state should be run through `tf.stop_gradient`.
@@ -404,8 +371,6 @@ class PMHMC(kernel_base.TransitionKernel):
                 target_log_prob_fn=target_log_prob_fn,
                 step_size=step_size,
                 num_leapfrog_steps=num_leapfrog_steps,
-                T=T,
-                N=N,
                 rho_size=rho_size,
                 state_gradients_are_stopped=state_gradients_are_stopped,
                 store_parameters_in_results=store_parameters_in_results,
@@ -426,16 +391,6 @@ class PMHMC(kernel_base.TransitionKernel):
     def num_leapfrog_steps(self):
         """Returns the num_leapfrog_steps parameter"""
         return self._impl.inner_kernel.num_leapfrog_steps
-
-    @property
-    def T(self):
-        """Returns the first dimension T of auxiliary variable u"""
-        return self._impl.inner_kernel.T
-    
-    @property
-    def N(self):
-        """Returns the second dimension N of auxiliary variable u"""
-        return self._impl.inner_kernel.N
 
     @property
     def rho_size(self):
@@ -463,7 +418,7 @@ class PMHMC(kernel_base.TransitionKernel):
         """Performs one step of PM-HMC sampling.
 
         Args:
-          current_state: Current state, containing [theta, u_flat]
+          current_state: Current state, containing [theta, u]
           previous_kernel_results: Previous kernel results
           seed: Random seed
 
@@ -495,10 +450,10 @@ def _compute_log_acceptance_correction(current_momentums,
     3. Auxiliary variable momentum kinetic energy: 0.5 * sum(p^2)
 
     Args:
-        current_momentums: List containing current momentum [rho, p_flat]
-        proposed_momentums: List containing proposed momentum [rho_new, p_flat_new]
-        current_state_parts: List containing current state [theta, u_flat]
-        proposed_state_parts: List containing proposed state [theta_new, u_flat_new]
+        current_momentums: List containing current momentum [rho, p]
+        proposed_momentums: List containing proposed momentum [rho_new, p_new]
+        current_state_parts: List containing current state [theta, u]
+        proposed_state_parts: List containing proposed state [theta_new, u_new]
         independent_chain_ndims: Scalar `int` `Tensor` representing number of independent chains
         rho_size: Scaling factor for parameter momentum
         name: Python `str` prefixed to Ops created by this function
@@ -508,12 +463,12 @@ def _compute_log_acceptance_correction(current_momentums,
     """
     with tf.name_scope(name or 'compute_log_acceptance_correction'):
         # Extract momentum parts
-        current_rho, current_p_flat = current_momentums
-        proposed_rho, proposed_p_flat = proposed_momentums
+        current_rho, current_p = current_momentums
+        proposed_rho, proposed_p = proposed_momentums
         
         # Extract state parts
-        _, current_u_flat = current_state_parts
-        _, proposed_u_flat = proposed_state_parts
+        _, current_u = current_state_parts
+        _, proposed_u = proposed_state_parts
         
         # Calculate parameter kinetic energy (with mass factor)
         current_rho_kinetic = 0.5 * tf.reduce_sum(
@@ -528,24 +483,24 @@ def _compute_log_acceptance_correction(current_momentums,
         
         # Calculate auxiliary variable u kinetic energy - added part
         current_u_kinetic = 0.5 * tf.reduce_sum(
-            tf.square(current_u_flat), 
-            axis=ps.range(independent_chain_ndims, ps.rank(current_u_flat))
+            tf.square(current_u), 
+            axis=ps.range(independent_chain_ndims, ps.rank(current_u))
         )
         
         proposed_u_kinetic = 0.5 * tf.reduce_sum(
-            tf.square(proposed_u_flat), 
-            axis=ps.range(independent_chain_ndims, ps.rank(proposed_u_flat))
+            tf.square(proposed_u), 
+            axis=ps.range(independent_chain_ndims, ps.rank(proposed_u))
         )
         
         # Calculate auxiliary variable momentum p kinetic energy
         current_p_kinetic = 0.5 * tf.reduce_sum(
-            tf.square(current_p_flat), 
-            axis=ps.range(independent_chain_ndims, ps.rank(current_p_flat))
+            tf.square(current_p), 
+            axis=ps.range(independent_chain_ndims, ps.rank(current_p))
         )
         
         proposed_p_kinetic = 0.5 * tf.reduce_sum(
-            tf.square(proposed_p_flat), 
-            axis=ps.range(independent_chain_ndims, ps.rank(proposed_p_flat))
+            tf.square(proposed_p), 
+            axis=ps.range(independent_chain_ndims, ps.rank(proposed_p))
         )
         
         # Calculate total kinetic energy difference, including three parts
@@ -565,10 +520,10 @@ def _prepare_args(target_log_prob_fn,
     """Process input arguments to meet list-form assumptions"""
     state_parts, _ = mcmc_util.prepare_state_parts(state, name='current_state')
     
-    # Ensure state contains two parts: theta and u_flat
+    # Ensure state contains two parts: theta and u
     if len(state_parts) != 2:
         raise ValueError(
-            "PM-HMC requires state to contain two parts: [theta, u_flat], "
+            "PM-HMC requires state to contain two parts: [theta, u], "
             f"but received {len(state_parts)} parts."
         )
     
@@ -578,8 +533,6 @@ def _prepare_args(target_log_prob_fn,
     target_log_prob, grads_target_log_prob = mcmc_util.maybe_call_fn_and_grads(
         target_log_prob_fn, state_parts, target_log_prob, grads_target_log_prob)
     
-
-        
     step_sizes, _ = mcmc_util.prepare_state_parts(
         step_size, dtype=target_log_prob.dtype, name='step_size')
         

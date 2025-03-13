@@ -45,25 +45,20 @@ def initialize_sample_data():
     return Y, Z, beta_true, current_u, T, N
 
 
-def joint_log_prob_fn(theta, u_flat, y, Z, T, N):
+def joint_log_prob_fn(theta, u, y, Z):
     """
     Calculate joint log probability function.
     
     Args:
         theta: Parameter vector
-        u_flat: Flattened auxiliary variables
+        u: Auxiliary variables with shape [T, N]
         y: Observed data
         Z: Covariates
-        T: Time steps
-        N: Number of auxiliary variables
         
     Returns:
         float: Log probability value
     """
-    # Reshape flattened u to [T, N] shape
-    u = tf.reshape(u_flat, [T, N])
-    
-    # Use compute_log_posterior to calculate log likelihood and its gradients
+    # Directly use compute_log_posterior without reshaping
     log_prob = compute_log_posterior(theta, u, y, Z)
     
     return log_prob
@@ -82,8 +77,8 @@ def run_pm_hmc_sampling():
     theta_size = tf.size(initial_theta)
     
     # Define target_log_prob_fn - Note TFP will pass states as multiple parameters
-    target_log_prob_fn = lambda theta, u_flat: joint_log_prob_fn(
-        theta, u_flat, Y, Z, T, N
+    target_log_prob_fn = lambda theta, u: joint_log_prob_fn(
+        theta, u, Y, Z
     )
     
     # Print confirmation information
@@ -107,15 +102,11 @@ def run_pm_hmc_sampling():
         target_log_prob_fn=target_log_prob_fn,
         step_size=h,
         num_leapfrog_steps=L,
-        T=T,
-        N=N,
         rho_size=rho_size
     )
     
     # Prepare initial state
-    # Flatten u
-    initial_u_flat = tf.reshape(current_u, [-1])
-    initial_state = [initial_theta, initial_u_flat]
+    initial_state = [initial_theta, current_u]
     
     # Record start time
     start_time = time.time()
@@ -140,7 +131,7 @@ def run_pm_hmc_sampling():
     print(f"Sampling complete! Time taken: {sampling_time:.2f} seconds")
     
     # Extract parameters from sampling results
-    # samples is a list containing [theta_samples, u_flat_samples]
+    # samples is a list containing [theta_samples, u_samples]
     theta_samples = samples[0].numpy()  # Shape: [num_results, 13]
     
     # Extract and calculate means
