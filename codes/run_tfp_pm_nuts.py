@@ -99,7 +99,7 @@ def run_pm_nuts_sampling():
     pm_nuts_kernel = NoUTurnSampler(
         target_log_prob_fn=target_log_prob_fn,
         step_size=h,
-        max_tree_depth=5,
+        max_tree_depth=10,
         rho_size=rho_size
     )
 
