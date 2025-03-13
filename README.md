@@ -13,7 +13,8 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 3. Train the Hamiltonian Neural Networks using
    - **`train_hnn_hamiltonian.py`** to train the HNN.
 4. Use the following files to replicate results:
-   - Run PM-HMC sampling with TFP transition kernels using **`run_tfp_pm_hmc.py`** 
+   - Run PM-HMC sampling with TFP transition kernels using **`run_tfp_pm_hmc.py`**
+   - Run PM-NUTS sampling with TFP transition kernels using **`run_tfp_pm_nuts.py`** 
    - Run PM-HMC sampling using **`run_pm_hmc.py`** 
    - Run PM-NUTS sampling using **`run_pm_hmc_nuts_complex.py`**
    - Run HNN-HMC sampling using **`run_hnn_hmc.py`**
@@ -40,7 +41,8 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
 Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are
 - **`pm_hmc.py`** that performs PM-HMC .
 - **`pm_hmc_integrator.py`** that performs strang splitting.
-
+- **`NUTS.py`** that performs PM-NUTS.
+  
 ### Log-probability files
 - **`log_likelihood_auto.py`**: Computes the log-likelihood and its gradient using auto-differentiation.
 - **`log_likelihood_stable.py`**: Computes the log-likelihood and explicitly expresses the gradient.
@@ -54,7 +56,8 @@ Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which
 - **`run_tfp_pm_hmc.py`**: Executes PM-HMC sampling using modified TFP transition Kernels
 - **`run_pm_hmc.py`**: Executes PM-HMC sampling, which produces identical results w.r.t PM-HMC sampling using TFP.
 - **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
-- **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
+- **`run_tfp_pm_nuts.py`**: Executes PM-NUTS sampling using modified TFP transition Kernels
+- **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling, with extra stopping conditions and extra interface for HNN.
 
 ### Utilities
 - **`pm_hmc_steps.py`**: Contains functions for performing PM-HMC sampling steps, including:
