@@ -206,3 +206,12 @@ This file tests the integration of HNN with Hamiltonian Monte Carlo (HMC) sampli
   - Tests energy conservation during HMC sampling with varying step sizes.
 
 ---
+
+### 8. **test_tfp_pm_hmc.py** and **test_tfp_pm_nuts.py**
+
+#### Purpose:
+These two files test the sampling using Tensorflow Probability transition kernels.
+
+Core functions are tested to ensure the sampling can perform.
+
+---
