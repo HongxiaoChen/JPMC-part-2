@@ -35,6 +35,12 @@ python -m unittest discover -v
 
 The main code files are stored in the **`codes/`** directory. Below is a detailed description of the key files and their functionality:
 
+### Transition Kernels
+
+Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are:
+-- **`pm_hmc.py`** that performs PM-HMC .
+-- **`pm_hmc_integrator.py`** that performs strang splitting.
+
 ### Log-probability files
 - **`log_likelihood_auto.py`**: Computes the log-likelihood and its gradient using auto-differentiation.
 - **`log_likelihood_stable.py`**: Computes the log-likelihood and explicitly expresses the gradient.
@@ -45,6 +51,7 @@ The main code files are stored in the **`codes/`** directory. Below is a detaile
 - **`train_hnn_hamiltonian.py`**: Trains the Hamiltonian Neural Networks.
 
 ### Sampling
+- **`run_tfp_pm_hmc.py`**: Executes PM-HMC sampling using modified TFP transition Kernels
 - **`run_pm_hmc.py`**: Executes PM-HMC sampling.
 - **`run_hnn_hmc.py`**: Executes HNN-HMC sampling.
 - **`run_pm_hmc_nuts_complex.py`**: Executes NUTS sampling.
