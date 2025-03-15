@@ -6,6 +6,23 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ---
 
+## Update on 16th March, 2025
+
+This latest update is beyond the deadline and only serves for a completion of the requirements. 
+
+To review the actual submission, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded at 13th March.
+
+Of course, it is also very welcomed to review this latest version.
+
+New replication files are added:
+- Run PM-HMC sampling with TFP transition kernels using **`run_tfp_hnn_hmc_original.py`**
+
+New Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are
+- **`hnn_hmc_original.py`** that performs HNN-HMC .
+- **`hnn_hmc_integrator_original.py`** that performs one-step leapfrog described in Dhulipala (2023).
+
+---
+
 ## How to Run
 
 1. Set up the environment using Python 3.11 and install TensorFlow 2.15.
