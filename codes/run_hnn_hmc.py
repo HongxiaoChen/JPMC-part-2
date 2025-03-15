@@ -122,7 +122,7 @@ def leapfrog_steps(model, theta, rho, h, L, rho_size):
 
     for _ in tf.range(L):
         # Half step in theta using rho gradient
-        _, _, grad_rho = model.compute_gradients(current_theta, current_rho)
+        # _, _, grad_rho = model.compute_gradients(current_theta, current_rho)
         #current_theta = current_theta + (h / 2) * grad_rho
         current_theta = current_theta + (h / 2) * current_rho / rho_size
         # Full step in rho using theta gradient
