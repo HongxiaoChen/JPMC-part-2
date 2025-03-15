@@ -9,10 +9,10 @@ PRIOR_VARIANCE = tf.constant(100.0)  # Prior variance for parameters
 
 # MCMC sampling parameters (not used in log_likelihood_stable.py)
 MCMC_PARAMS = {
-    'M': 200,  # Total number of iterations
-    'BURN_IN': 0,  # Number of burn-in iterations
+    'M': 25000,  # Total number of iterations
+    'BURN_IN': 5000,  # Number of burn-in iterations
     'H': 0.025,  # Step size
-    'L': 50,  # Number of leapfrog steps
+    'L': 20,  # Number of leapfrog steps
     'N': 128,  # Number of auxiliary variables
     'P': 1,  # Dimension of auxiliary variables
     'RHO_SIZE': 10.0,  # Rho scale factor
@@ -93,8 +93,8 @@ NUTS_PARAMS = {
     'hnn_threshold': 20.0,  # HNN error threshold
     'leapfrog_threshold': 1000.0,  # Leapfrog error threshold
     'n_cooldown': 20,  # Cooldown period
-    'total_samples': 10,  # Total number of samples
-    'burn_in': 5,  # Number of burn-in samples
+    'total_samples': 7000,  # Total number of samples
+    'burn_in': 1000,  # Number of burn-in samples
     'nuts_step_size': 0.025,  # Initial step size
     'rho_size': 10.0,  # Rho scale factor
     'traditional_only': False,  # Whether to use only traditional leapfrog
