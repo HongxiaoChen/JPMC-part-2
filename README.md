@@ -10,9 +10,7 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 This update is beyond the deadline on 13th March and only serves for making this repository more complete.
 
-To review the actual submission on 13th March, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded at 13th March.
-
-Of course, it is also very welcomed to review this latest version.
+To review the actual submission on 13th March, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded on 13th March.
 
 New replication files are added:
 - Run PM-HMC sampling with TFP transition kernels using **`run_tfp_hnn_hmc_original.py`**
