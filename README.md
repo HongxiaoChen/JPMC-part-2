@@ -12,8 +12,8 @@ This update is beyond the deadline on 13th March and only serves for making this
 
 To review the actual submission on 13th March, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded on 13th March.
 
-New replication files are added:
-- Run PM-HMC sampling with TFP transition kernels using **`run_tfp_hnn_hmc_original.py`**
+In this update, new replication files are added:
+- Run HNN-HMC sampling with TFP transition kernels using **`run_tfp_hnn_hmc_original.py`**
 
 New Transition Kernels are put in the folder **`codes/tfp_modified_kernels`**, which are
 - **`hnn_hmc_original.py`** that performs HNN-HMC .
