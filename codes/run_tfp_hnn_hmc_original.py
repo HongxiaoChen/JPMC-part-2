@@ -103,33 +103,41 @@ def plot_parameter_traces(samples, h, L, rho_size):
     plt.close()
 
 
-def run_hnn_hmc_tfp():
-    """使用TFP实现的HNN-HMC采样"""
-    # 设置
+def run_hnn_hmc_tfp(seed=42):
+    """sample using TFP-HNN-HMC
+    
+    Args:
+        seed: random seed, default is 42
+    """
+    # set up logger
     logger = setup_logger()
     ensure_directories()
+    
+    # use the fixed random seed
+    logger.info(f"Using fixed random seed: {seed}")
+    tf.random.set_seed(seed)
+    np.random.seed(seed)
 
-    # 生成真实数据用于比较
+    # generate true data for comparison
     T = DATA_PARAMS['T']
     n = DATA_PARAMS['N_SUBJECTS']
     num_features = DATA_PARAMS['NUM_FEATURES']
     Y, X, Z, beta_true = generate_samples(T, n, num_features)
 
-    # 加载模型和权重
+    # load model and weights
     model = HNN(activation='sin')
     model.load_weights(HNN_WEIGHTS_PATH)
 
-    # 获取参数
+    # get parameters
     M = MCMC_PARAMS['M']
     h = MCMC_PARAMS['H']
     L = MCMC_PARAMS['L']
     burn_in = MCMC_PARAMS['BURN_IN']
     rho_size = MCMC_PARAMS['RHO_SIZE']
 
-    # 初始化状态
     current_theta = initialize_theta()
 
-    # 创建HNN-HMC kernel
+    # create HNN-HMC kernel
     hnn_hmc_kernel = HNNHamiltonianMonteCarlo(
         hnn_model=model,
         step_size=h,
@@ -137,39 +145,38 @@ def run_hnn_hmc_tfp():
         rho_size=rho_size
     )
 
-    # 记录开始时间
+    # record start time
     start_time = time.time()
 
     logger.info("Starting HNN-HMC-TFP sampling")
     logger.info(f"Parameters: M={M}, h={h}, L={L}, burn_in={burn_in}, rho_size={rho_size}")
 
-    # 使用TFP的sample_chain执行采样
+    # use TFP's sample_chain to execute sampling
     @tf.function
     def run_chain():
         samples = sample_chain(
             num_results=M,
             current_state=current_theta,
             kernel=hnn_hmc_kernel,
-            num_burnin_steps=burn_in,  # 直接在采样时处理burn-in
+            num_burnin_steps=burn_in,
             trace_fn=None,
-            return_final_kernel_results=False,  # 不需要返回kernel结果
+            return_final_kernel_results=False,
+            seed=seed
         )
         return samples
 
-    # 执行采样
+    # execute sampling
     samples = run_chain()
     
-    # 转换为NumPy数组以便计算统计量
+    # convert to NumPy array for calculation
     samples_np = samples.numpy()
-    
-    # 这里不需要再移除burn-in样本，因为已经在sample_chain中指定了num_burnin_steps
     samples_after_burnin = samples_np
 
-    # 计算后验均值
+    # calculate the posterior mean
     posterior_mean_beta = np.mean(samples_after_burnin[:, :8], axis=0)
     posterior_mean_mu = np.mean(samples_after_burnin[:, 8:10], axis=0)
 
-    # 对于lambda，计算逆均值
+    # for lambda, calculate the inverse mean
     inv_lambda1 = 1.0 / np.exp(samples_after_burnin[:, 10])
     inv_lambda2 = 1.0 / np.exp(samples_after_burnin[:, 11])
     posterior_mean_lambda = np.array([
@@ -179,10 +186,10 @@ def run_hnn_hmc_tfp():
 
     posterior_mean_w = 1.0 - tf.sigmoid(np.mean(samples_after_burnin[:, 12])).numpy()
 
-    # 最终统计
+    # final statistics
     total_time = time.time() - start_time
 
-    # 记录结果
+    # record results
     logger.info("\nSampling completed:")
     logger.info(f"Total samples: {M} (including {burn_in} burn-in samples)")
     logger.info(f"Samples after burn-in: {M - burn_in}")
@@ -197,28 +204,23 @@ def run_hnn_hmc_tfp():
     logger.info(f"lambda2: {posterior_mean_lambda[1]}")
     logger.info(f"w1: {posterior_mean_w}")
 
-    # 生成trace plots
+    # produce plots
     logger.info("\nGenerating parameter trace plots...")
     plot_parameter_traces(samples_after_burnin, h, L, rho_size)
     logger.info("Parameter trace plots have been saved to the figures directory.")
 
-    # 移除接受率从返回值中
+
     return (samples_after_burnin, 
             posterior_mean_beta, posterior_mean_mu,
             posterior_mean_lambda, posterior_mean_w, logger)
 
 
 if __name__ == "__main__":
-    # 设置随机种子以确保可重复性
-    tf.random.set_seed(42)
-    np.random.seed(42)
 
-    # 运行TFP版本的HNN-HMC
     (samples, 
      posterior_mean_beta, posterior_mean_mu,
      posterior_mean_lambda, posterior_mean_w, logger) = run_hnn_hmc_tfp()
 
-    # 打印最终结果
     print("\nHNN-HMC-TFP sampling completed:")
     print("\nParameter estimates:")
     print("Beta:", posterior_mean_beta)
