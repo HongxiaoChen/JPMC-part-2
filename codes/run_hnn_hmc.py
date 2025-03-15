@@ -102,7 +102,7 @@ def plot_parameter_traces(samples, h, L, rho_size):
 
 
 @tf.function
-def leapfrog_steps(model, theta, rho, h, L):
+def leapfrog_steps(model, theta, rho, h, L, rho_size):
     """
     Execute L steps of leapfrog integration using HNN
 
@@ -123,16 +123,16 @@ def leapfrog_steps(model, theta, rho, h, L):
     for _ in tf.range(L):
         # Half step in theta using rho gradient
         _, _, grad_rho = model.compute_gradients(current_theta, current_rho)
-        current_theta = current_theta + (h / 2) * grad_rho
-
+        #current_theta = current_theta + (h / 2) * grad_rho
+        current_theta = current_theta + (h / 2) * current_rho / rho_size
         # Full step in rho using theta gradient
         _, grad_theta, _ = model.compute_gradients(current_theta, current_rho)
         current_rho = current_rho - h * grad_theta
 
         # Half step in theta using rho gradient
-        _, _, grad_rho = model.compute_gradients(current_theta, current_rho)
-        current_theta = current_theta + (h / 2) * grad_rho
-
+        #_, _, grad_rho = model.compute_gradients(current_theta, current_rho)
+        #current_theta = current_theta + (h / 2) * grad_rho
+        current_theta = current_theta + (h / 2) * current_rho / rho_size
     # Remove batch dimension before returning
     return tf.squeeze(current_theta, 0), tf.squeeze(current_rho, 0)
 
@@ -168,7 +168,7 @@ def metropolis_step(model, theta, rho, theta_new, rho_new):
 
     # Compute acceptance probability
     delta_H = H_proposed - H_current
-    accept_prob = tf.minimum(1.0, tf.exp(delta_H))
+    accept_prob = tf.minimum(1.0, tf.exp(-delta_H))
 
     # Accept/reject
     uniform = tf.random.uniform([])
@@ -220,7 +220,7 @@ def run_hnn_hmc():
 
         # Leapfrog integration
         proposed_theta, proposed_rho = leapfrog_steps(
-            model, current_theta, current_rho, h, L
+            model, current_theta, current_rho, h, L, rho_size
         )
 
         # Metropolis step
@@ -297,8 +297,6 @@ def run_hnn_hmc():
 
 if __name__ == "__main__":
     # Set random seed for reproducibility
-    tf.random.set_seed(42)
-    np.random.seed(42)
 
     # Run HNN-HMC
     (samples, acceptance_rate, posterior_mean_beta, posterior_mean_mu,

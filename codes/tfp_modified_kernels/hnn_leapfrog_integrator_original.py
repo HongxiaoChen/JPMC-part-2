@@ -91,7 +91,7 @@ class HNNLeapfrogIntegrator(leapfrog_impl.LeapfrogIntegrator):
                 # half step update theta
                 #_, _, grad_rho = self.hnn_model.compute_gradients(theta, rho)
                 #theta = theta + (self.step_size / 2) * grad_rho
-                theta = theta + (self.step_size / 2) * rho / 10.0
+                theta = theta + (self.step_size / 2) * rho / self._rho_size
                 # full step update rho
                 _, grad_theta, _ = self.hnn_model.compute_gradients(theta, rho)
                 rho = rho - self.step_size * grad_theta
@@ -99,7 +99,7 @@ class HNNLeapfrogIntegrator(leapfrog_impl.LeapfrogIntegrator):
                 # half step update theta
                 #_, _, grad_rho = self.hnn_model.compute_gradients(theta, rho)
                 #theta = theta + (self.step_size / 2) * grad_rho
-                theta = theta + (self.step_size / 2) * rho / 10.0
+                theta = theta + (self.step_size / 2) * rho / self._rho_size
                 
                 return i + 1, theta, rho
             
