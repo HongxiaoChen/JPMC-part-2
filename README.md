@@ -8,9 +8,9 @@ Codes and reports for part 1 of this task are in [HNN HMC](https://github.com/Ho
 
 ## Update on 16th March, 2025
 
-This latest update is beyond the deadline and only serves for a completion of the requirements. 
+This update is beyond the deadline on 13th March and only serves for making this repository more complete.
 
-To review the actual submission, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded at 13th March.
+To review the actual submission on 13th March, you can click 'Commits' and then click 'browse repository at this point' (with the sign '<>' at the right side) to choose the version uploaded at 13th March.
 
 Of course, it is also very welcomed to review this latest version.
 
